@@ -1,0 +1,67 @@
+[workspace]
+name = "r-jupytergis"
+description = "R library for interactive with Jupyter GIS widgets"
+channels = ["conda-forge"]
+platforms = ["osx-arm64", "osx-64", "linux-64", "win-64"]
+
+[environments]
+dev = { features = ["test", "dev"], solve-group = "default" }
+
+[dependencies]
+r-base = ">=4.1"
+r-yr = ">=0.1.4"
+r-ywidgets = ">=0.1.3"
+r-r6 = "*"
+xeus-r = ">=0.11.0"  # hera
+jupytergis = ">=0.15.0"
+
+[feature.test.dependencies]
+r-testthat = ">=3.0.0"
+
+[feature.test.tasks]
+description = "Run r-jupytergis unit tests"
+test = "Rscript -e 'testthat::test_local()'"
+
+[feature.dev.dependencies]
+r-devtools = "*"
+r-roxygen2 = "==8.0.0"
+air = "*"
+typos = "*"
+pre-commit = "*"
+jupyterlab = ">=4"
+jupyterlab-kernelspy = "*"
+
+[feature.dev.tasks.install-jupytergis]
+cmd = "R CMD INSTALL ."
+
+[feature.dev.tasks.serve-jupyter]
+cmd = "jupyter"
+depends-on = ["install-jupytergis"]
+
+[feature.dev.tasks.test-example]
+cmd = """
+rm -f examples/gis-render-test.ipynb && \
+jupyter nbconvert \
+  --to notebook \
+  --execute \
+  --ExecutePreprocessor.store_widget_state=False \
+  --output gis-render-test.ipynb \
+  examples/gis.ipynb  && \
+grep 'application/vnd.jupyter.ywidget-view+json' examples/gis-render-test.ipynb
+"""
+depends-on = ["install-jupytergis"]
+
+[feature.dev.tasks]
+# Document
+doc = "rm -rf man/ && Rscript -e 'devtools::document()'"
+# Formatters
+fmt-air = "air format R/ tests/"
+fmt-tombi = "tombi format"
+fmt = { depends-on = ["fmt-air", "fmt-tombi"] }
+# Checkers
+check-r = "Rscript -e 'devtools::check()'"  # Not ready
+check-typos = "typos --write-changes"
+check = { depends-on = ["check-typos"] }
+# Pre-commit easy alias
+pre-commit = "pre-commit"
+pre-commit-all = "pre-commit run --all-files"

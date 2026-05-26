@@ -1,0 +1,28 @@
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v6.0.0
+    hooks:
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+      - id: check-yaml
+      - id: check-toml
+      - id: check-merge-conflict
+      - id: mixed-line-ending
+  - repo: local
+    hooks:
+      - id: pixi-doc
+        name: "Run documentation generator through pixi"
+        entry: pixi run doc
+        language: system
+        types_or: [r]
+        pass_filenames: false
+      - id: pixi-format-air
+        name: "Run air format through pixi"
+        entry: pixi run fmt-air
+        language: system
+        types_or: [r]
+        pass_filenames: false
+      - id: pixi-check-typos
+        name: "Run typos through pixi"
+        entry: pixi run check-typos
+        language: system
